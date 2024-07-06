@@ -5,11 +5,12 @@ import (
 	"net/http"
 
 	"github.com/srisudarshanrg/HackhiveProject/pkg/config"
+	"github.com/srisudarshanrg/HackhiveProject/pkg/driver"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/handlers"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/render"
 )
 
-const portNumber = ":5050"
+const portNumber = ":5000"
 
 var app config.AppConfig
 
@@ -21,10 +22,17 @@ func main() {
 
 	app.TemplateCache = templateCache
 
-	render.SetAppConfig(&app)
-
 	repo := handlers.SetAppConfigHandler(&app)
 	handlers.NewHandlers(repo)
+	render.SetAppConfig(&app)
+
+	// create database
+	db, err := driver.CreateDatabaseConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	handlers.DatabaseAccess(db)
 
 	srv := &http.Server{
 		Addr:    portNumber,
