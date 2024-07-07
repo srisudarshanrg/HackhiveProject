@@ -60,7 +60,7 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 	var errorString string
 
 	if rowsAffected == 0 {
-		errorString = "Username not found"
+		errorString = "Username or Password incorrect"
 		errorMap["notFound"] = errorString
 		render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
 			CustomErrors: errorMap,
@@ -81,13 +81,12 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-		log.Println(password)
 
 		if password_entered == password {
 			log.Println("Login successful.")
 
 		} else {
-			errorString = "Password is incorrect"
+			errorString = "Username or Password incorrect"
 			errorMap["notFound"] = errorString
 			render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
 				CustomErrors: errorMap,
