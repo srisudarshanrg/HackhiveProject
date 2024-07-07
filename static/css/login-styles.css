@@ -10,7 +10,8 @@ div.row {
     font-family: "Ubuntu", sans-serif;
 }
 
-.signup-form {
+.auth-form {
+    box-shadow: 5px 5px 15px #646464;
     width: 100%;
     padding: 2%;
     margin: 0;
