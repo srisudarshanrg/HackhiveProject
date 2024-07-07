@@ -10,19 +10,20 @@
                 <h2>Login Form</h2>
                 <br>
                 <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required placeholder="Enter username">
+                    <label for="username_entered" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username_entered" required placeholder="Enter username">
                 </div>
-                <label class="text-danger"></label> 
         
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password">
+                    <label for="password_entered" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password_entered" required placeholder="Enter password">
                 </div>
                 <label class="text-danger"></label> 
-
+                <a href="/signup">Or sign up</a>
                 <br>
-        
+
+                <label class="text-danger">{{index .CustomErrors "notFound"}}</label> 
+
                 <button type="submit" class="btn btn-primary">Submit</button>       
             </form>
         </div>

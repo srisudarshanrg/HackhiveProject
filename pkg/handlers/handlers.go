@@ -33,12 +33,67 @@ func DatabaseAccess(database *sql.DB) {
 }
 
 func (a *HandlerAccess) Login(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{})
+	render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
+		CustomErrors: nil,
+	})
 }
 
 func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
 
-	http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	username_entered := r.Form.Get("username_entered")
+	password_entered := r.Form.Get("password_entered")
+
+	searchUsernameQuery := `select * from login_details where username=$1`
+	result, err := db.Exec(searchUsernameQuery, username_entered)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+
+	errorMap := map[string]interface{}{}
+	var errorString string
+
+	if rowsAffected == 0 {
+		errorString = "Username not found"
+		errorMap["notFound"] = errorString
+		render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
+			CustomErrors: errorMap,
+		})
+	} else {
+		var password string
+
+		confirmPasswordQuery := `select password from login_details where username=$1`
+		row, err := db.Query(confirmPasswordQuery, username_entered)
+		if err != nil {
+			log.Println(err)
+		}
+
+		defer row.Close()
+		for row.Next() {
+			err := row.Scan(&password)
+			if err != nil {
+				panic(err)
+			}
+		}
+		log.Println(password)
+
+		if password_entered == password {
+			log.Println("Login successful.")
+
+		} else {
+			errorString = "Password is incorrect"
+			errorMap["notFound"] = errorString
+			render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
+				CustomErrors: errorMap,
+			})
+		}
+	}
 }
 
 func (a *HandlerAccess) SignUp(w http.ResponseWriter, r *http.Request) {
