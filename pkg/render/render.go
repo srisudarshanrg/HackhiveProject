@@ -63,7 +63,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		if len(layouts) > 0 {
 			templateSet, err = templateSet.ParseGlob("./templates/*.layout.tmpl")
 			if err != nil {
-				log.Println("Error while parsing layouts")
+				log.Println(err)
 				return templateCache, err
 			}
 		}
