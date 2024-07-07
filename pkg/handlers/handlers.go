@@ -42,7 +42,9 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *HandlerAccess) SignUp(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "sign-up.page.tmpl", &models.TemplateData{})
+	render.RenderTemplate(w, r, "sign-up.page.tmpl", &models.TemplateData{
+		CustomErrors: nil,
+	})
 }
 
 func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
@@ -54,11 +56,33 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	username := r.Form.Get("username")
 	password := r.Form.Get("password")
 
-	addRowQuery := `insert into login_details (username, password) values($1, $2)`
-	_, err = db.Exec(addRowQuery, username, password)
+	searchUniqueQuery := `select username from login_details where username = $1`
+	result, err := db.Exec(searchUniqueQuery, username)
+
 	if err != nil {
 		log.Println(err)
 	}
 
-	driver.DisplayRows(db)
+	rowsAffected, _ := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		addRowQuery := `insert into login_details (username, password) values($1, $2)`
+		_, err = db.Exec(addRowQuery, username, password)
+		if err != nil {
+			log.Println(err)
+		}
+
+		driver.DisplayRows(db)
+
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	} else {
+		errorMap := map[string]interface{}{}
+
+		errorText := "This username already exists. Choose another one."
+		errorMap["uniqueUsername"] = errorText
+
+		render.RenderTemplate(w, r, "sign-up.page.tmpl", &models.TemplateData{
+			CustomErrors: errorMap,
+		})
+	}
 }

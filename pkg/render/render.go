@@ -32,7 +32,7 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 
 	err = template.Execute(w, td)
 	if err != nil {
-		log.Println("Could not parse and execute template")
+		log.Println(err)
 	}
 }
 
