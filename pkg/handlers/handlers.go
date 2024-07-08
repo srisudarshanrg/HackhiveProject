@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/srisudarshanrg/HackhiveProject/pkg/config"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/driver"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/models"
@@ -66,7 +68,7 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 			CustomErrors: errorMap,
 		})
 	} else {
-		var password string
+		var hashed_password string
 
 		confirmPasswordQuery := `select password from login_details where username=$1`
 		row, err := db.Query(confirmPasswordQuery, username_entered)
@@ -76,15 +78,16 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 		defer row.Close()
 		for row.Next() {
-			err := row.Scan(&password)
+			err := row.Scan(&hashed_password)
 			if err != nil {
 				panic(err)
 			}
 		}
 
-		if password_entered == password {
-			log.Println("Login successful.")
+		check := GetPasswordFromHash(password_entered, hashed_password)
 
+		if check {
+			log.Println("Login successful.")
 		} else {
 			errorString = "Username or Password incorrect"
 			errorMap["notFound"] = errorString
@@ -120,8 +123,10 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	rowsAffected, _ := result.RowsAffected()
 
 	if rowsAffected == 0 {
+		hashed_password, err := HashPassword(password)
+
 		addRowQuery := `insert into login_details (username, password) values($1, $2)`
-		_, err = db.Exec(addRowQuery, username, password)
+		_, err = db.Exec(addRowQuery, username, hashed_password)
 		if err != nil {
 			log.Println(err)
 		}
@@ -139,4 +144,24 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 			CustomErrors: errorMap,
 		})
 	}
+}
+
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return string(hashedPassword), nil
+}
+
+func GetPasswordFromHash(entered_password string, hashed string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(entered_password))
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
 }
