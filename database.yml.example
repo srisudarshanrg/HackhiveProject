@@ -1,6 +1,6 @@
 development:
   dialect: postgresql
-  database: postgres
+  database: hackhive
   user: 
   password: 
   host: 127.0.0.1
