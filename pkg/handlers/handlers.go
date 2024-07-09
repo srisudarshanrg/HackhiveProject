@@ -46,11 +46,11 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	username_entered := r.Form.Get("username_entered")
+	detail_entered := r.Form.Get("username_entered")
 	password_entered := r.Form.Get("password_entered")
 
-	searchUsernameQuery := `select * from login_details where username=$1`
-	result, err := db.Exec(searchUsernameQuery, username_entered)
+	searchDetailQuery := `select * from login_details where username=$1 or email=$2 or phone=$3`
+	result, err := db.Exec(searchDetailQuery, detail_entered, detail_entered, detail_entered)
 
 	if err != nil {
 		log.Println(err)
@@ -70,8 +70,8 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 	} else {
 		var hashed_password string
 
-		confirmPasswordQuery := `select password from login_details where username=$1`
-		row, err := db.Query(confirmPasswordQuery, username_entered)
+		confirmPasswordQuery := `select password from login_details where username=$1 or email=$2 or phone=$3`
+		row, err := db.Query(confirmPasswordQuery, detail_entered, detail_entered, detail_entered)
 		if err != nil {
 			log.Println(err)
 		}
@@ -164,10 +164,5 @@ func HashPassword(password string) (string, error) {
 
 func GetPasswordFromHash(entered_password string, hashed string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(entered_password))
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return true
+	return err == nil
 }
