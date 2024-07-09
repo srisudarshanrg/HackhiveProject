@@ -16,7 +16,7 @@
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required placeholder="Enter username">
                         </div>
-                        <label class="text-danger">{{index .CustomErrors "uniqueUsername"}}</label> 
+                         
                 
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
@@ -26,20 +26,23 @@
 
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div class="mb-3">
-                            <label for="email">Email</label>
-                            <input type="email" name="email" id="email" required placeholder="Enter email:">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" name="email" id="email" class="form-control" required placeholder="Enter email:">
+                        </div>
+                        
 
-                            <br>
-
-                            <label for="phone">Phone</label>
-                            <input type="text" name="phone" id="phone">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" name="phone" id="phone" class="form-control">
                         </div>
                     </div>
-                </div>
-                
+                </div>                
 
                 <br>
-        
+                
+                <label class="text-danger">{{index .CustomErrors "uniqueDetail"}}</label>
+                <br>
+                <br>
                 <button type="submit" class="btn btn-primary">Submit</button>       
             </form>
         </div>

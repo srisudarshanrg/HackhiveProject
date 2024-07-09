@@ -115,8 +115,8 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	phone := r.Form.Get("phone")
 
-	searchUniqueQuery := `select username from login_details where username = $1`
-	result, err := db.Exec(searchUniqueQuery, username)
+	searchUniqueQueryUsername := `select username from login_details where username = $1 or email = $2 or phone = $3`
+	result, err := db.Exec(searchUniqueQueryUsername, username, email, phone)
 
 	if err != nil {
 		log.Println(err)
@@ -143,8 +143,8 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	} else {
 		errorMap := map[string]interface{}{}
 
-		errorText := "This username already exists. Choose another one."
-		errorMap["uniqueUsername"] = errorText
+		errorText := "This user already exists. Choose another one."
+		errorMap["uniqueDetail"] = errorText
 
 		render.RenderTemplate(w, r, "sign-up.page.tmpl", &models.TemplateData{
 			CustomErrors: errorMap,
