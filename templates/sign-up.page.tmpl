@@ -9,16 +9,34 @@
             <form action="/signup" method="post" class="auth-form text-center">
                 <h2>Sign-Up Form</h2>
                 <br>
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required placeholder="Enter username">
+
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Enter username">
+                        </div>
+                        <label class="text-danger">{{index .CustomErrors "uniqueUsername"}}</label> 
+                
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                        <div class="mb-3">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" required placeholder="Enter email:">
+
+                            <br>
+
+                            <label for="phone">Phone</label>
+                            <input type="text" name="phone" id="phone">
+                        </div>
+                    </div>
                 </div>
-                <label class="text-danger">{{index .CustomErrors "uniqueUsername"}}</label> 
-        
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required placeholder="Enter password">
-                </div>
+                
 
                 <br>
         

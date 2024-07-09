@@ -112,6 +112,8 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 	username := r.Form.Get("username")
 	password := r.Form.Get("password")
+	email := r.Form.Get("email")
+	phone := r.Form.Get("phone")
 
 	searchUniqueQuery := `select username from login_details where username = $1`
 	result, err := db.Exec(searchUniqueQuery, username)
@@ -125,8 +127,12 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	if rowsAffected == 0 {
 		hashed_password, err := HashPassword(password)
 
-		addRowQuery := `insert into login_details (username, password) values($1, $2)`
-		_, err = db.Exec(addRowQuery, username, hashed_password)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		addRowQuery := `insert into login_details (username, password, email, phone) values($1, $2, $3, $4)`
+		_, err = db.Exec(addRowQuery, username, hashed_password, email, phone)
 		if err != nil {
 			log.Println(err)
 		}

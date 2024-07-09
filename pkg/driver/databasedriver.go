@@ -23,23 +23,23 @@ func CreateDatabaseConnection() (*sql.DB, error) {
 }
 
 func DisplayRows(db *sql.DB) error {
-	rows, err := db.Query("select id, username, password from login_details")
+	rows, err := db.Query("select id, username, password, email, phone from login_details")
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 	defer rows.Close()
 
-	var username, password string
+	var username, password, email, phone string
 	var id int
 
 	for rows.Next() {
-		err := rows.Scan(&id, &username, &password)
+		err := rows.Scan(&id, &username, &password, &email, &phone)
 		if err != nil {
-			log.Println(err)
+			log.Println("Error scanning", err)
 			return err
 		}
-		fmt.Println("Record is", id, username, password)
+		fmt.Println("Record is", id, username, password, email, phone)
 	}
 
 	if err = rows.Err(); err != nil {
