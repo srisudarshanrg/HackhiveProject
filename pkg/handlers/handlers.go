@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"net/smtp"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -34,12 +37,16 @@ func DatabaseAccess(database *sql.DB) {
 	db = database
 }
 
+// Handlers for templates and posted forms
+
+// Login is the handler for login page
 func (a *HandlerAccess) Login(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, r, "login.page.tmpl", &models.TemplateData{
 		CustomErrors: nil,
 	})
 }
 
+// PostLogin is the handler for the login form
 func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -98,12 +105,14 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SignUp is the handler for sign up page
 func (a *HandlerAccess) SignUp(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, r, "sign-up.page.tmpl", &models.TemplateData{
 		CustomErrors: nil,
 	})
 }
 
+// PostSignUp is the handler for the sign up form
 func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -139,7 +148,7 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 		driver.DisplayRows(db)
 
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		log.Println("Added user to database")
 	} else {
 		errorMap := map[string]interface{}{}
 
@@ -151,6 +160,36 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 }
+
+// ForgotPassword is the handler for the forgot password page
+func (a *HandlerAccess) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "forgot-password.page.tmpl", &models.TemplateData{})
+}
+
+func (a *HandlerAccess) PostForgotPassword(w http.ResponseWriter, r *http.Request) {
+	otp := rand.Intn(999999)
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	email := r.Form.Get("email")
+
+	// Send email
+	from := "srisudarshanrg@gmail.com"
+	password := "ibus bzym onzv zuxk"
+	to := []string{email}
+
+	message := []byte(fmt.Sprintf("OTP for %s is %d", email, otp))
+
+	err = SendEmail(from, to, message, password)
+
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// Associated Functions
 
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -165,4 +204,21 @@ func HashPassword(password string) (string, error) {
 func GetPasswordFromHash(entered_password string, hashed string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(entered_password))
 	return err == nil
+}
+
+func SendEmail(from string, to []string, message []byte, password string) error {
+	// smtp server configurations
+	smtpHost := "smtp.gmail.com"
+	smtpPort := "587"
+
+	// Authentication
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
 }
