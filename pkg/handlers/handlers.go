@@ -211,8 +211,47 @@ func (a *HandlerAccess) PostConfirmOTP(w http.ResponseWriter, r *http.Request) {
 	otp_correct := otp
 
 	if otpRecieved == otp_correct {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/resetpassword", http.StatusSeeOther)
 	} else {
 		log.Println("Wrong otp")
+	}
+}
+
+// ResetPassword is the handler for the reset password page
+func (a *HandlerAccess) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "reset-password.page.tmpl", &models.TemplateData{})
+}
+
+func (a *HandlerAccess) PostResetPassword(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	email := r.Form.Get("email")
+	newPassword := r.Form.Get("reset_password")
+	confirmPassword := r.Form.Get("confirm_password")
+
+	if newPassword == confirmPassword {
+		newHashPassword, err := HashPassword(newPassword)
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		resetPasswordQuery := `update login_details set password=$1 where email=$2`
+		_, err = db.Exec(resetPasswordQuery, newHashPassword, email)
+		if err != nil {
+			log.Println(err)
+		}
+	} else {
+		errorMapPassword := map[string]interface{}{}
+
+		errorPassword := "Error changing password"
+		errorMapPassword["errorPassword"] = errorPassword
+
+		render.RenderTemplate(w, r, "reset-password.page.tmpl", &models.TemplateData{
+			CustomErrors: errorMapPassword,
+		})
 	}
 }

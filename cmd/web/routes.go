@@ -23,6 +23,9 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/otpconfirm", handlers.Repo.ConfirmOTP)
 	mux.Post("/otpconfirm", handlers.Repo.PostConfirmOTP)
 
+	mux.Get("/resetpassword", handlers.Repo.ResetPassword)
+	mux.Post("/resetpassword", handlers.Repo.PostResetPassword)
+
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
