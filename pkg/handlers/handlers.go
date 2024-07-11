@@ -6,9 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"net/smtp"
-
-	"golang.org/x/crypto/bcrypt"
+	"strconv"
 
 	"github.com/srisudarshanrg/HackhiveProject/pkg/config"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/driver"
@@ -18,6 +16,7 @@ import (
 
 var Repo HandlerAccess
 var db *sql.DB
+var otp string
 
 type HandlerAccess struct {
 	App *config.AppConfig
@@ -187,38 +186,33 @@ func (a *HandlerAccess) PostForgotPassword(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		log.Println(err)
 	}
+
+	var otp_convert = strconv.Itoa(otp)
+	SetOtp(otp_convert)
+
+	http.Redirect(w, r, "/otpconfirm", http.StatusSeeOther)
 }
 
-// Associated Functions
+// ConfirmOTP is the handler for confirm otp page
+func (a *HandlerAccess) ConfirmOTP(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "confirm-otp.page.tmpl", &models.TemplateData{})
+}
 
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+// PostConfirmOTP handles the response by the form in the confirm-otp.page.tmpl page
+func (a *HandlerAccess) PostConfirmOTP(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
 	if err != nil {
 		log.Println(err)
-		return "", err
 	}
 
-	return string(hashedPassword), nil
-}
+	otpRecieved := r.Form.Get("confirm_otp")
 
-func GetPasswordFromHash(entered_password string, hashed string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(entered_password))
-	return err == nil
-}
+	// get correct otp. otp variable is accessible throughout the file
+	otp_correct := otp
 
-func SendEmail(from string, to []string, message []byte, password string) error {
-	// smtp server configurations
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-
-	// Authentication
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
-	if err != nil {
-		log.Println(err)
-		return err
+	if otpRecieved == otp_correct {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	} else {
+		log.Println("Wrong otp")
 	}
-
-	return nil
 }
