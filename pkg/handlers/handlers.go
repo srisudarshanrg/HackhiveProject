@@ -255,3 +255,20 @@ func (a *HandlerAccess) PostResetPassword(w http.ResponseWriter, r *http.Request
 		})
 	}
 }
+
+func (a *HandlerAccess) ResourceStatus(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{})
+}
+
+func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	country_entered := r.Form.Get("country")
+
+	getCountryQuery := "select * from resource_status where country=$1"
+	_, err = db.Exec(getCountryQuery, country_entered)
+
+}

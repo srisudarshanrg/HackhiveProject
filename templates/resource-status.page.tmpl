@@ -1,0 +1,25 @@
+{{template "standard" .}}
+
+{{define "content"}}
+    {{$table_values := index .Data ""}}
+
+    <form method="post">
+        <h3>Get resource consumption status of a country</h3>
+        <div class="mb-3">
+            <label for="country" class="form-label">Enter Desired Country:</label>
+            <input type="text" class="form-control" id="country" name="country">
+        </div>
+        <button type="submit" class="btn btn-primary">Enter</button>
+    </form>
+
+    <table>
+        <tr>
+            <td>Country: </td>
+            <td>Oil: </td>
+            <td>Electricity: </td>
+            <td>Coal: </td>
+            <td>Natural Gas: </td>
+            <td>Biofuel: </td>
+        </tr>
+    </table>
+{{end}}

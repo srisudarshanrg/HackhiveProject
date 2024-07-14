@@ -33,6 +33,7 @@ func main() {
 	}
 
 	handlers.DatabaseAccess(db)
+	defer db.Close()
 
 	srv := &http.Server{
 		Addr:    portNumber,

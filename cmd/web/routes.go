@@ -14,17 +14,20 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/login", handlers.Repo.Login)
 	mux.Post("/login", handlers.Repo.PostLogin)
 
-	mux.Get("/signup", handlers.Repo.SignUp)
-	mux.Post("/signup", handlers.Repo.PostSignUp)
+	mux.Get("/sign-up", handlers.Repo.SignUp)
+	mux.Post("/sign-up", handlers.Repo.PostSignUp)
 
-	mux.Get("/forgotpassword", handlers.Repo.ForgotPassword)
-	mux.Post("/forgotpassword", handlers.Repo.PostForgotPassword)
+	mux.Get("/forgot-password", handlers.Repo.ForgotPassword)
+	mux.Post("/forgot-password", handlers.Repo.PostForgotPassword)
 
-	mux.Get("/otpconfirm", handlers.Repo.ConfirmOTP)
-	mux.Post("/otpconfirm", handlers.Repo.PostConfirmOTP)
+	mux.Get("/otp-confirm", handlers.Repo.ConfirmOTP)
+	mux.Post("/otp-confirm", handlers.Repo.PostConfirmOTP)
 
-	mux.Get("/resetpassword", handlers.Repo.ResetPassword)
-	mux.Post("/resetpassword", handlers.Repo.PostResetPassword)
+	mux.Get("/reset-password", handlers.Repo.ResetPassword)
+	mux.Post("/reset-password", handlers.Repo.PostResetPassword)
+
+	mux.Get("/resource-status", handlers.Repo.ResourceStatus)
+	mux.Post("/resource-status", handlers.Repo.PostResourceStatus)
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
