@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/srisudarshanrg/HackhiveProject/pkg/config"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/driver"
@@ -267,8 +268,66 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 	}
 
 	country_entered := r.Form.Get("country")
+	country_entered = strings.ToLower(country_entered)
+
+	checkCountryQuery := "select * from resource_status where lower(country)=$1"
+	result, err := db.Exec(checkCountryQuery, country_entered)
+	if err != nil {
+		log.Println(err)
+	}
+
+	affected, _ := result.RowsAffected()
+
+	if affected == 0 {
+		errorMap := map[string]interface{}{}
+
+		errorString := "No such country exists"
+		errorMap["noCountry"] = errorString
+
+		render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{
+			CustomErrors: errorMap,
+		})
+	}
+
+	var country, oil, electricity, coal, natural_gas, biofuel string
+	var id int
 
 	getCountryQuery := "select * from resource_status where country=$1"
-	_, err = db.Exec(getCountryQuery, country_entered)
+	row, err := db.Query(getCountryQuery, country_entered)
+	if err != nil {
+		log.Println(err)
+	}
+	defer row.Close()
 
+	for row.Next() {
+		err = row.Scan(&id, &country, &oil, &electricity, &coal, &natural_gas, &biofuel)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	type CountryDetail struct {
+		Country     string
+		Oil         string
+		Electricity string
+		Coal        string
+		NaturalGas  string
+		Biofuel     string
+	}
+
+	specificCountry := CountryDetail{
+		Country:     country,
+		Oil:         oil,
+		Electricity: electricity,
+		Coal:        coal,
+		NaturalGas:  natural_gas,
+		Biofuel:     biofuel,
+	}
+
+	entryMap := map[string]interface{}{}
+	entryMap["countryRow"] = specificCountry
+
+	render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{
+		Data: entryMap,
+	})
 }

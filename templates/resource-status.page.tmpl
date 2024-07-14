@@ -1,7 +1,7 @@
 {{template "standard" .}}
 
 {{define "content"}}
-    {{$table_values := index .Data ""}}
+    {{$table_values := index .Data "countryRow"}}
 
     <form method="post">
         <h3>Get resource consumption status of a country</h3>
@@ -14,12 +14,12 @@
 
     <table>
         <tr>
-            <td>Country: </td>
-            <td>Oil: </td>
-            <td>Electricity: </td>
-            <td>Coal: </td>
-            <td>Natural Gas: </td>
-            <td>Biofuel: </td>
+            <td>Country: {{$table_values.Country}}</td>
+            <td>Oil: {{$table_values.Oil}}</td>
+            <td>Electricity: {{$table_values.Electricity}}</td>
+            <td>Coal: {{$table_values.Coal}}</td>
+            <td>Natural Gas: {{$table_values.NaturalGas}}</td>
+            <td>Biofuel: {{$table_values.Biofuel}}</td>
         </tr>
     </table>
 {{end}}
