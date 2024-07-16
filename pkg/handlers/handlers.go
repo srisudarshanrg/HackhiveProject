@@ -258,7 +258,10 @@ func (a *HandlerAccess) PostResetPassword(w http.ResponseWriter, r *http.Request
 }
 
 func (a *HandlerAccess) ResourceStatus(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{})
+	render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{
+		CustomErrors: nil,
+		Data:         nil,
+	})
 }
 
 func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Request) {
@@ -270,8 +273,8 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 	country_entered := r.Form.Get("country")
 	country_entered = strings.ToLower(country_entered)
 
-	checkCountryQuery := "select * from resource_status where lower(country)=$1"
-	result, err := db.Exec(checkCountryQuery, country_entered)
+	getCountryQuery := "select * from resource_status where lower(country)=$1"
+	result, err := db.Exec(getCountryQuery, country_entered)
 	if err != nil {
 		log.Println(err)
 	}
@@ -287,12 +290,14 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 		render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{
 			CustomErrors: errorMap,
 		})
+
+		return
 	}
 
 	var country, oil, electricity, coal, natural_gas, biofuel string
+	var created_at, updated_at interface{}
 	var id int
 
-	getCountryQuery := "select * from resource_status where country=$1"
 	row, err := db.Query(getCountryQuery, country_entered)
 	if err != nil {
 		log.Println(err)
@@ -300,7 +305,7 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 	defer row.Close()
 
 	for row.Next() {
-		err = row.Scan(&id, &country, &oil, &electricity, &coal, &natural_gas, &biofuel)
+		err = row.Scan(&id, &country, &oil, &electricity, &coal, &natural_gas, &biofuel, &created_at, &updated_at)
 		if err != nil {
 			log.Println(err)
 		}
@@ -324,10 +329,10 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 		Biofuel:     biofuel,
 	}
 
-	entryMap := map[string]interface{}{}
-	entryMap["countryRow"] = specificCountry
+	data := map[string]interface{}{}
+	data["countryRow"] = specificCountry
 
 	render.RenderTemplate(w, r, "resource-status.page.tmpl", &models.TemplateData{
-		Data: entryMap,
+		Data: data,
 	})
 }
