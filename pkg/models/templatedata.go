@@ -1,7 +1,7 @@
 package models
 
 type TemplateData struct {
-	CustomErrors map[string]interface{}
-	CustomInfo   map[string]interface{}
+	CustomErrors map[string]string
+	CustomInfo   map[string]string
 	Data         map[string]interface{}
 }

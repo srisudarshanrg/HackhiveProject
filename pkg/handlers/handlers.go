@@ -66,7 +66,7 @@ func (a *HandlerAccess) PostLogin(w http.ResponseWriter, r *http.Request) {
 
 	rowsAffected, _ := result.RowsAffected()
 
-	errorMap := map[string]interface{}{}
+	errorMap := map[string]string{}
 	var errorString string
 
 	if rowsAffected == 0 {
@@ -151,7 +151,7 @@ func (a *HandlerAccess) PostSignUp(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Added user to database")
 	} else {
-		errorMap := map[string]interface{}{}
+		errorMap := map[string]string{}
 
 		errorText := "This user already exists. Choose another one."
 		errorMap["uniqueDetail"] = errorText
@@ -192,7 +192,7 @@ func (a *HandlerAccess) PostForgotPassword(w http.ResponseWriter, r *http.Reques
 	var otp_convert = strconv.Itoa(otp)
 	SetOtp(otp_convert)
 
-	http.Redirect(w, r, "/otpconfirm", http.StatusSeeOther)
+	http.Redirect(w, r, "/otp-confirm", http.StatusSeeOther)
 }
 
 // ConfirmOTP is the handler for confirm otp page
@@ -213,9 +213,16 @@ func (a *HandlerAccess) PostConfirmOTP(w http.ResponseWriter, r *http.Request) {
 	otp_correct := otp
 
 	if otpRecieved == otp_correct {
-		http.Redirect(w, r, "/resetpassword", http.StatusSeeOther)
+		http.Redirect(w, r, "/reset-password", http.StatusSeeOther)
 	} else {
-		log.Println("Wrong otp")
+		otpError := map[string]string{}
+
+		otpErrorString := "The OTP you have entered is incorrect please try again"
+		otpError["otpError"] = otpErrorString
+
+		render.RenderTemplate(w, r, "confirm-otp.page.tmpl", &models.TemplateData{
+			CustomErrors: otpError,
+		})
 	}
 }
 
@@ -247,7 +254,7 @@ func (a *HandlerAccess) PostResetPassword(w http.ResponseWriter, r *http.Request
 			log.Println(err)
 		}
 	} else {
-		errorMapPassword := map[string]interface{}{}
+		errorMapPassword := map[string]string{}
 
 		errorPassword := "Error changing password"
 		errorMapPassword["errorPassword"] = errorPassword
@@ -283,7 +290,7 @@ func (a *HandlerAccess) PostResourceStatus(w http.ResponseWriter, r *http.Reques
 	affected, _ := result.RowsAffected()
 
 	if affected == 0 {
-		errorMap := map[string]interface{}{}
+		errorMap := map[string]string{}
 
 		errorString := "No such country exists"
 		errorMap["noCountry"] = errorString
