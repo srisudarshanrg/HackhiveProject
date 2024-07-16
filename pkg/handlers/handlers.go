@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/srisudarshanrg/HackhiveProject/confidential"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/config"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/driver"
 	"github.com/srisudarshanrg/HackhiveProject/pkg/models"
@@ -177,7 +178,7 @@ func (a *HandlerAccess) PostForgotPassword(w http.ResponseWriter, r *http.Reques
 
 	// Send email
 	from := "srisudarshanrg@gmail.com"
-	password := "ibus bzym onzv zuxk"
+	password := confidential.EmailPassword()
 	to := []string{email}
 
 	message := []byte(fmt.Sprintf("OTP for %s is %d", email, otp))
